@@ -15,5 +15,5 @@ To run the app with this command line
 **Note**: Very important change the arguments with your images for you
 
 ```
-python3 main.py -o=original.jpg -u=unknown.jpg
+python3 main.py -o=https://example.com/original.jpg -u=https://example.com/unknown.jpg
 ```
