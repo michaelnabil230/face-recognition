@@ -12,7 +12,7 @@ pip install -r requirements.txt
 
 To run the app with this command line 
 
-**Note**: Very important Change the arguments with your images for you
+**Note**: Very important change the arguments with your images for you
 
 ```
 python3 main.py -o=original.jpg -u=unknown.jpg
