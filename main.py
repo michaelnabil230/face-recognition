@@ -18,9 +18,20 @@ args = parser.parse_args()
 
 
 def main():
-    original_image_src = download_image(args.original_image)
-    unknown_image_src = download_image(args.unknown_image)
 
+    original_image_src, unknown_image_src = get_images()
+
+    results = face_verification(original_image_src, unknown_image_src)
+
+    remove_images(original_image_src, unknown_image_src)
+
+    data = {
+        "is_same_user": results[0] == True
+    }
+    print(data)
+
+
+def face_verification(original_image_src, unknown_image_src):
     original_image = face_recognition.load_image_file(original_image_src)
     original_image_face_encoding = face_recognition.face_encodings(original_image)[
         0]
@@ -33,13 +44,35 @@ def main():
         unknown_face_encoding,
     )
 
-    remove_image(original_image_src)
-    remove_image(unknown_image_src)
+    return results
 
-    data = {
-        "is_same_user": results[0] == True
-    }
-    print(data)
+
+def is_url(url):
+    regex = re.compile(
+        r'^(?:http|ftp)s?://'  # http:// or https://
+        # domain...
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'
+        r'localhost|'  # localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
+        r'(?::\d+)?'  # optional port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+
+    return re.match(regex, url) is not None
+
+
+def get_images():
+
+    if is_url(args.original_image):
+        original_image_src = download_image(args.original_image)
+    else:
+        original_image_src = args.original_image
+
+    if is_url(args.unknown_image):
+        unknown_image_src = download_image(args.unknown_image)
+    else:
+        unknown_image_src = args.unknown_image
+
+    return [original_image_src, unknown_image_src]
 
 
 def check_for_image(response):
@@ -91,4 +124,13 @@ def remove_image(path):
         print("File does not exist")
 
 
-main()
+def remove_images(original_image_src, unknown_image_src):
+    if is_url(args.original_image):
+        remove_image(original_image_src)
+
+    if is_url(args.unknown_image):
+        remove_image(unknown_image_src)
+
+
+if __name__ == "__main__":
+    main()
