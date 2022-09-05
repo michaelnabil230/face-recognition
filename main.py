@@ -84,7 +84,11 @@ def download_image(url):
 
 
 def remove_image(path):
-    os.remove(path)
+    if os.path.isfile(path):
+        os.remove(path)
+        print("File has been deleted")
+    else:
+        print("File does not exist")
 
 
 main()
