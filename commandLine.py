@@ -20,7 +20,7 @@ args = parser.parse_args()
 def main():
 
     original_image_src, unknown_image_src = get_images()
-
+    
     results = face_verification(original_image_src, unknown_image_src)
 
     remove_images(original_image_src, unknown_image_src)
