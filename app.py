@@ -39,7 +39,7 @@ def compare_faces():
 
     return app.response_class(
         response=json.dumps({
-            "is_same_user": bool(results[0] == True)
+            "is_same_user": bool(results[0])
         }),
         status=200,
         mimetype='application/json'
