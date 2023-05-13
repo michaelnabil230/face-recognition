@@ -36,8 +36,11 @@ def main():
         print('Error')
         is_same_user = False
 
-    remove_image(original_image_src)
-    remove_image(unknown_image_src)
+    if is_valid_url(args.original_image):
+        remove_image(original_image_src)
+
+    if is_valid_url(args.unknown_image):
+        remove_image(unknown_image_src)
 
     print({
         "is_same_user": bool(is_same_user)
