@@ -2,9 +2,9 @@ from flask import Flask, request, json
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 from flask_cors import CORS
-import face_recognition
 import os
 import logging
+from deepface import DeepFace
 
 app = Flask(__name__)
 app.config['UPLOAD_PATH'] = 'temp'
@@ -17,62 +17,65 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 @app.route('/api/compare-faces', methods=['POST'])
 def compare_faces():
-    unknown = request.files['unknown']
-    original_image = request.files['original_image']
+    if 'unknown' not in request.files or 'original_image' not in request.files:
+        return app.response_class(
+            response=json.dumps({"error": "Missing files in the request"}),
+            status=400,
+            mimetype='application/json'
+        )
 
-    unknown_filename = os.path.join(
+    unknown_file = request.files['unknown']
+    original_file = request.files['original_image']
+
+    if not unknown_file.filename or not original_file.filename:
+        return app.response_class(
+            response=json.dumps({"error": "Empty files in the request"}),
+            status=400,
+            mimetype='application/json'
+        )
+
+    unknown_filename = secure_filename(unknown_file.filename)
+    original_filename = secure_filename(original_file.filename)
+
+    unknown_filepath = os.path.join(
         app.config['UPLOAD_PATH'],
-        secure_filename(unknown.filename),
+        unknown_filename,
+    )
+    original_filepath = os.path.join(
+        app.config['UPLOAD_PATH'],
+        original_filename,
     )
 
-    original_filename = os.path.join(
-        app.config['UPLOAD_PATH'],
-        secure_filename(original_image.filename),
-    )
+    unknown_file.save(unknown_filepath)
+    original_file.save(original_filepath)
 
-    unknown.save(unknown_filename)
-    original_image.save(original_filename)
+    try:
+        is_same_user = DeepFace.verify(
+            original_filepath,
+            unknown_filepath,
+        )['verified']
+    except ValueError:
+        print('Error')
+        is_same_user = False
 
-    results = face_verification(original_filename, unknown_filename)
-
-    remove_images(original_filename, unknown_filename)
+    remove_file(original_filepath)
+    remove_file(unknown_filepath)
 
     return app.response_class(
         response=json.dumps({
-            "is_same_user": bool(results[0])
+            "is_same_user": bool(is_same_user)
         }),
         status=200,
         mimetype='application/json'
     )
 
 
-def face_verification(original_image_src, unknown_image_src):
-    original_image = face_recognition.load_image_file(original_image_src)
-    original_image_face_encoding = face_recognition.face_encodings(original_image)[
-        0]
-
-    unknown_picture = face_recognition.load_image_file(unknown_image_src)
-    unknown_face_encoding = face_recognition.face_encodings(unknown_picture)[0]
-
-    results = face_recognition.compare_faces(
-        [original_image_face_encoding],
-        unknown_face_encoding,
-    )
-
-    return results
-
-
-def remove_image(path):
-    if os.path.isfile(path):
-        os.remove(path)
-        print("File has been deleted", path)
+def remove_file(filepath):
+    if os.path.isfile(filepath):
+        os.remove(filepath)
+        print("File has been deleted:", filepath)
     else:
-        print("File does not exist", path)
-
-
-def remove_images(original_image_src, unknown_image_src):
-    remove_image(original_image_src)
-    remove_image(unknown_image_src)
+        print("File does not exist:", filepath)
 
 
 @app.errorhandler(HTTPException)
@@ -99,9 +102,10 @@ if __name__ == '__main__':
         '--port',
         default=5001,
         type=int,
-        help='port to listen on',
+        help='Port to listen on',
     )
     args = parser.parse_args()
     port = args.port
+    host = '127.0.0.1'
 
-    app.run(host='127.0.0.1', port=port, debug=True)
+    app.run(host=host, port=port, debug=True)
