@@ -2,27 +2,31 @@
 
 ## Install requirements:
 
-To install the requirements
+To install the requirements, run the following command:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## How to run as serve ?
+## How to run as a server?
+
+To run the application as a server, use the following command:
 
 ```bash
 flask run
 ```
 
-Flask api will be hosted 5000 port
+The Flask API will be hosted on port 5000.
+
 ### Endpoints
-- /api/compare-faces 
 
-## How to run as command line ?
+- /api/compare-faces
 
-To run the app with this command line 
+## How to run from the command line?
 
-**Note**: Very important change the arguments with your images for you
+To run the application from the command line, use the following command:
+
+**Note: It is important to replace the arguments with the URLs or file paths of your own images.**
 
 ```bash
 python3 command_line.py -o=https://example.com/original.jpg -u=https://example.com/unknown.jpg
@@ -39,3 +43,13 @@ python3 command_line.py -o=images/king-salman/1.jpeg -u=images/king-salman/2.jpe
 ```bash
 python3 command_line.py -o=images/obama/1.jpeg -u=images/king-salman/2.jpeg
 ```
+
+## Additional Information
+
+Face recognition is a technology that identifies and verifies individuals by analyzing their facial features. It has various applications, including access control, surveillance systems, and personal identification. This project provides a face recognition system that can be run either as a server or from the command line.
+
+The `/api/compare-faces` endpoint is used to compare two faces and determine if they belong to the same person. It accepts input images and returns a response indicating the similarity between the faces.
+
+To run the application as a server, use the `flask run` command, and the server will be accessible on port 5000. The `/api/compare-faces` endpoint can be accessed by sending a POST request to that URL.
+
+To run the application from the command line, use the `command_line.py` script and provide the URLs or file paths of the images you want to compare as command-line arguments. The script will process the images and provide the result in the console output.

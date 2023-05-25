@@ -55,7 +55,7 @@ def compare_faces():
             unknown_filepath,
         )['verified']
     except ValueError:
-        print('Error')
+        print('Value error')
         is_same_user = False
 
     remove_file(original_filepath)
